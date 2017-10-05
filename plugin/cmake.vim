@@ -22,6 +22,7 @@ endfunction
 " Public Interface:
 command! -nargs=? CMake call s:cmake(<f-args>)
 command! CMakeClean call s:cmakeclean()
+command! -nargs=? Make call s:make(<f-args>)
 
 function! s:cmake(...)
 
@@ -68,8 +69,7 @@ function! s:cmake(...)
 
     let s:cmd = 'cmake '. l:argumentstr . " " . join(a:000) .' .. '
     echo s:cmd
-    let s:res = system(s:cmd)
-    echo s:res
+    execute 'AsyncRun' s:cmd
 
     exec 'cd - '
 
@@ -90,3 +90,16 @@ function! s:cmakeclean()
   endif
 
 endfunction
+
+function! s:make(...)
+    let g:cmake_build_dir = get(g:, 'cmake_build_dir', 'build')
+    let s:build_dir = finddir(g:cmake_build_dir, '.;')
+
+    exec 'cd' s:fnameescape(s:build_dir)
+
+    let s:cmd = 'make '. " ". join(a:000)
+    echo s:cmd
+    execute 'AsyncRun' s:cmd
+    exec 'cd - '
+endfunction
+
